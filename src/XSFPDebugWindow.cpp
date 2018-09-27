@@ -56,8 +56,11 @@ bool XSFPDebugWindowCreate(void)
 
 void XSFPDebugWindowDestroy(void)
 {
-  XPLMDestroyWindow(g_window);
-	g_window = NULL;
+  if (g_window != NULL)
+  {
+    XPLMDestroyWindow(g_window);
+	  g_window = NULL;
+  }
 }
 
 void	draw(XPLMWindowID in_window_id, void * in_refcon)
@@ -160,5 +163,11 @@ void	draw(XPLMWindowID in_window_id, void * in_refcon)
   sprintf(scratch_buffer, "SPD BRK: %f\n", floatValue);
   XPLMDrawString(col_white, l, y, scratch_buffer, NULL, xplmFont_Proportional);
   y -= 1.5 * char_height;
+
+  intValue = XPLMGetDatai(XPLMFindDataRef("1-sim/parckBrake"));
+  sprintf(scratch_buffer, "PARK BRK: %d\n", intValue);
+  XPLMDrawString(col_white, l, y, scratch_buffer, NULL, xplmFont_Proportional);
+  y -= 1.5 * char_height;
+
 }
 

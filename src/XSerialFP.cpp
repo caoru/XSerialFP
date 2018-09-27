@@ -29,9 +29,13 @@
 #include "SharedValue.h"
 
 #include "XSerialFP.h"
+#include "XSFPLog.h"
 #include "XSFPMenu.h"
 #include "XSFPSerial.h"
 #include "XSFPHandler.h"
+#include "XSFPHandlerDefault.h"
+#include "XSFPHandlerFF320.h"
+#include "XSFPHandlerFF350.h"
 #include "XSFPDebugWindow.h"
 
 #ifndef XPLM300
@@ -66,13 +70,13 @@ PLUGIN_API int XPluginStart(
 
   XSFPMenuCreate();
 
-  XSFPDebugWindowCreate();
+  //XSFPDebugWindowCreate();
 
   serialfp.mcp().Connect("/dev/tty.usbserial-A4001LAE");
   serialfp.cdu().Connect("/dev/tty.usbserial-A4001rMr");
   //g_serial_fd = XSFPSerialConnect("/dev/tty.usbserial-A4001LAE");
 
-  XPLMRegisterFlightLoopCallback(initFF, 1.0, NULL);
+  //XPLMRegisterFlightLoopCallback(initFF, 1.0, NULL);
 
   //XPLMRegisterFlightLoopCallback(SerialPortAccessCB, 1.0, NULL);
 
@@ -96,8 +100,19 @@ PLUGIN_API void XPluginStop(void)
   //XSFPSerialDisconnect(g_serial_fd);
 }
 
-PLUGIN_API void XPluginDisable(void) { }
-PLUGIN_API int XPluginEnable(void) { return 1; }
+PLUGIN_API void XPluginDisable(void)
+{
+  //XSFPDebugWindowDestroy();
+
+  //serialfp.mcp().Disconnect();
+  //serialfp.cdu().Disconnect();
+}
+
+PLUGIN_API int XPluginEnable(void)
+{
+  return 1;
+}
+
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void * inParam)
 {
   XPLMDataRef AcfDescription = NULL;
@@ -113,6 +128,50 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void * inP
           XPLMGetDatab(AcfDescription, ByteVals, 0, 500);
           serialfp.aircraft_desc((char *)&ByteVals);
         }
+
+        XSFPLog("Load aircraft '%s'", serialfp.aircraft_desc().c_str());
+
+        if (serialfp.aircraft_desc().find("FlightFactor Airbus A320") != std::string::npos)
+        {
+          XSFPHandlerFF320 *mcp_handler = new XSFPHandlerFF320();
+          XSFPHandlerFF320 *cdu_handler = new XSFPHandlerFF320();
+
+          serialfp.aircraft_type(XSFP_AIRCRAFT_TYPE_FF320);
+          XSFPLog("Initialize %s", serialfp.aircraft_desc().c_str());
+
+          serialfp.mcp_handler(mcp_handler);
+          serialfp.cdu_handler(cdu_handler);
+
+          XPLMRegisterFlightLoopCallback(initFF, 1.0, NULL);
+        }
+        else if (serialfp.aircraft_desc().find("FlightFactor Airbus A350") != std::string::npos)
+        {
+          XSFPHandlerFF350 *mcp_handler = new XSFPHandlerFF350();
+          XSFPHandlerFF350 *cdu_handler = new XSFPHandlerFF350();
+
+          serialfp.aircraft_type(XSFP_AIRCRAFT_TYPE_FF350);
+          XSFPLog("Initialize %s", serialfp.aircraft_desc().c_str());
+
+          serialfp.mcp_handler(mcp_handler);
+          serialfp.cdu_handler(cdu_handler);
+
+          XPLMRegisterFlightLoopCallback(MCPSerialPortAccessCB, 1.0, NULL);
+          XPLMRegisterFlightLoopCallback(CDUSerialPortAccessCB, 1.0, NULL);
+        }
+        else
+        {
+          XSFPHandlerDefault *mcp_handler = new XSFPHandlerDefault();
+          XSFPHandlerDefault *cdu_handler = new XSFPHandlerDefault();
+
+          XSFPLog("Initialize default settings");
+
+          serialfp.mcp_handler(mcp_handler);
+          serialfp.cdu_handler(cdu_handler);
+
+          XPLMRegisterFlightLoopCallback(MCPSerialPortAccessCB, 1.0, NULL);
+          XPLMRegisterFlightLoopCallback(CDUSerialPortAccessCB, 1.0, NULL);
+        }
+
         break;
     }
   }
@@ -148,7 +207,7 @@ float MCPSerialPortAccessCB(float elapsedMe, float elapsedSim, int counter, void
     if (mcp_fpbuffer_recv == 8)
     {
       strcpy(mcp_fpdata, mcp_fpbuffer.c_str());
-      serialfp.mcp_handler().Perform(mcp_fpbuffer);
+      serialfp.mcp_handler()->Perform(mcp_fpbuffer);
 
       mcp_fpbuffer.clear();
       mcp_fpbuffer_recv = 0;
@@ -178,7 +237,7 @@ float CDUSerialPortAccessCB(float elapsedMe, float elapsedSim, int counter, void
     if (cdu_fpbuffer_recv == 8)
     {
       strcpy(cdu_fpdata, cdu_fpbuffer.c_str());
-      serialfp.cdu_handler().Perform(cdu_fpbuffer);
+      serialfp.cdu_handler()->Perform(cdu_fpbuffer);
 
       cdu_fpbuffer.clear();
       cdu_fpbuffer_recv = 0;
@@ -189,7 +248,10 @@ float CDUSerialPortAccessCB(float elapsedMe, float elapsedSim, int counter, void
 }
 
 XSerialFP::XSerialFP()
-  : aircraft_desc_ ("Unknown")
+  : aircraft_type_ (XSFP_AIRCRAFT_TYPE_UNKNOWN),
+    aircraft_desc_ ("Unknown"),
+    mcp_handler_(NULL),
+    cdu_handler_(NULL)
 {
 }
 

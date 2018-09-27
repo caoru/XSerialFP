@@ -35,7 +35,7 @@ void XSFPHandler::Perform(std::string message)
 
   if (results_.empty()) return;
 
-  XSFPLog("[%s] %s %s %s\n",
+  XSFPLog("[%s] %s %s %s",
           results_[0].str().c_str(),
           results_[1].str().c_str(),
           results_[2].str().c_str(),
@@ -59,6 +59,7 @@ void XSFPHandler::Perform(std::string message)
   else if (results_[1] == "CTL") PerformCTL();
 }
 
+#if 0
 void XSFPHandler::PerformCDU(void)
 {
   int intValue = 1;
@@ -754,4 +755,5 @@ void XSFPHandler::PerformCTL(void)
   {
   }
 }
+#endif
 

@@ -12,6 +12,9 @@ add_xplane_plugin(XSerialFP 301
   src/XSFPMenu.cpp
   src/XSFPSerial.cpp
   src/XSFPHandler.cpp
+  src/XSFPHandlerDefault.cpp
+  src/XSFPHandlerFF320.cpp
+  src/XSFPHandlerFF350.cpp
   src/XSFPFF320.cpp
   src/XSFPDebugWindow.cpp
 )

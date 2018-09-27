@@ -15,24 +15,24 @@ public:
 private:
   void Parse(void);
 
-  void PerformCDU(void);
-  void PerformSPD(void);
-  void PerformHDG(void);
-  void PerformALT(void);
-  void PerformVVS(void);
-  void PerformAPL(void);
-  void PerformBAR(void);
-  void PerformNDM(void);
-  void PerformNDR(void);
-  void PerformEFI(void);
-  void PerformCOM(void);
-  void PerformNAV(void);
-  void PerformADF(void);
-  void PerformDME(void);
-  void PerformTRN(void);
-  void PerformCTL(void);
+  virtual void PerformCDU(void) = 0;
+  virtual void PerformSPD(void) = 0;
+  virtual void PerformHDG(void) = 0;
+  virtual void PerformALT(void) = 0;
+  virtual void PerformVVS(void) = 0;
+  virtual void PerformAPL(void) = 0;
+  virtual void PerformBAR(void) = 0;
+  virtual void PerformNDM(void) = 0;
+  virtual void PerformNDR(void) = 0;
+  virtual void PerformEFI(void) = 0;
+  virtual void PerformCOM(void) = 0;
+  virtual void PerformNAV(void) = 0;
+  virtual void PerformADF(void) = 0;
+  virtual void PerformDME(void) = 0;
+  virtual void PerformTRN(void) = 0;
+  virtual void PerformCTL(void) = 0;
 
-private:
+protected:
   std::regex regex_;
   std::string message_;
   std::smatch results_;

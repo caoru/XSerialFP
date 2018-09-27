@@ -4,6 +4,7 @@
 
 #include "XSFPLog.h"
 
+/*
 int XSFPLog(const char *format, ...)
 {
   va_list arg;
@@ -18,4 +19,5 @@ int XSFPLog(const char *format, ...)
 
   return done;
 }
+*/
 

@@ -3,6 +3,7 @@
 
 #include "XPLMPlugin.h"
 
+#include "XSFPDebugWindow.h"
 #include "XSFPMenu.h"
 
 int g_menu_container_idx; // The index of our menu item in the Plugins menu
@@ -12,13 +13,8 @@ bool XSFPMenuCreate(void)
 {
   g_menu_container_idx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "XSerialFP", 0, 0);
   g_menu_id = XPLMCreateMenu("XSerialFP", XPLMFindPluginsMenu(), g_menu_container_idx, XSFPMenuHandler, NULL);
-  XPLMAppendMenuItem(g_menu_id, "Settings", (void *)"Settings", 1);
+  XPLMAppendMenuItem(g_menu_id, "Debug Window", (void *)"Debug Window", 1);
   XPLMAppendMenuSeparator(g_menu_id);
-  XPLMAppendMenuItem(g_menu_id, "Toggle Shortcuts", (void *)"Shortcuts ", 1);
-  XPLMAppendMenuItemWithCommand(g_menu_id, "Toggle Flight Configuration (Command-Based)", XPLMFindCommand("sim/operation/toggle_flight_config"));
-  XPLMAppendMenuItem(g_menu_id, "Reload", (void *)"Reload", 1);
-  XPLMAppendMenuItem(g_menu_id, "Test", (void *)"Test", 1);
-  XPLMAppendMenuItem(g_menu_id, "Test 2", (void *)"Test 2", 1);
 
   return true;
 }
@@ -30,9 +26,9 @@ void XSFPMenuDestroy()
 
 void XSFPMenuHandler(void * in_menu_ref, void * in_item_ref)
 {
-  if(!strcmp((const char *)in_item_ref, "Settings"))
+  if(!strcmp((const char *)in_item_ref, "Debug Window"))
   {
-    XPLMCommandOnce(XPLMFindCommand("sim/operation/toggle_settings_window"));
+    XSFPDebugWindowCreate();
   }
   else if(!strcmp((const char *)in_item_ref, "Shortcuts"))
   {

@@ -53,6 +53,8 @@ int XSFPFF320::GetValueIntByName(const char *name)
   int ffid;
   int value;
 
+  if (!initialized_) return 0;
+
   ffid = api_.ValueIdByName(name);
   api_.ValueGet(ffid, &value);
 
@@ -63,6 +65,8 @@ void XSFPFF320::SetValueIntByName(const char *name, int value)
 {
   int ffid;
 
+  if (!initialized_) return;
+
   ffid = api_.ValueIdByName(name);
   api_.ValueSet(ffid, &value);
 }
@@ -71,6 +75,8 @@ float XSFPFF320::GetValueFloatByName(const char *name)
 {
   int ffid;
   float value;
+
+  if (!initialized_) return 0.0f;
 
   ffid = api_.ValueIdByName(name);
   api_.ValueGet(ffid, &value);
@@ -82,6 +88,8 @@ void XSFPFF320::GetValueFloatByName(const char *name, float value)
 {
   int ffid;
 
+  if (!initialized_) return;
+
   ffid = api_.ValueIdByName(name);
   api_.ValueSet(ffid, &value);
 }
@@ -89,6 +97,8 @@ void XSFPFF320::GetValueFloatByName(const char *name, float value)
 void XSFPFF320AddUpdateData(const char *name, int value, int counter)
 {
   XSFPFF320UpdataData *data;
+
+  if (!serialfp.ff320_api().initialized()) return;
 
   data = (XSFPFF320UpdataData *)malloc(sizeof(XSFPFF320UpdataData));
   if (data == NULL) return ;
